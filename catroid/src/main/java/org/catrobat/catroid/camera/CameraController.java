@@ -1,6 +1,10 @@
 package org.catrobat.catroid.camera;
 
 import com.badlogic.gdx.math.Vector2;
+import org.catrobat.catroid.ProjectManager;
+import org.catrobat.catroid.content.Scene;
+import org.catrobat.catroid.content.Sprite;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,8 +70,108 @@ public class CameraController {
      * is done elsewhere (StageListener will query camera positions and render accordingly).
      */
     public void update(float delta) {
-        // TODO: resolve sprite targets, read sprite world positions and update Camera.position
-        // using simple LERP when followMode == SMOOTH_FOLLOW.
+        Scene currentScene = ProjectManager.getInstance().getCurrentlyPlayingScene();
+        if (currentScene == null) {
+            return;
+        }
+
+        for (Camera camera : cameras.values()) {
+            if (!camera.enabled || camera.targetSpriteName == null) {
+                continue;
+            }
+
+            try {
+                Sprite target = currentScene.getSprite(camera.targetSpriteName);
+                if (target == null) {
+                    continue;
+                }
+
+                // Attempt to read the sprite's world position from its Look
+                float targetX = 0f;
+                float targetY = 0f;
+
+                try {
+                    // Many parts of the engine expose look through sprite.look
+                    // Fallback to 0,0 if not available
+                    Object lookObj = null;
+                    try {
+                        lookObj = target.getClass().getField("look").get(target);
+                    } catch (NoSuchFieldException nsf) {
+                        // ignore
+                    }
+
+                    if (lookObj != null) {
+                        // use reflection to call getXInUserInterfaceDimensionUnit / getYInUserInterfaceDimensionUnit
+                        try {
+                            targetX = ((Number) lookObj.getClass()
+                                    .getMethod("getXInUserInterfaceDimensionUnit").invoke(lookObj)).floatValue();
+                            targetY = ((Number) lookObj.getClass()
+                                    .getMethod("getYInUserInterfaceDimensionUnit").invoke(lookObj)).floatValue();
+                        } catch (Exception e) {
+                            // reflection failed, try alternative methods on Sprite
+                            try {
+                                targetX = ((Number) target.getClass()
+                                        .getMethod("getXInUserInterfaceDimensionUnit").invoke(target)).floatValue();
+                                targetY = ((Number) target.getClass()
+                                        .getMethod("getYInUserInterfaceDimensionUnit").invoke(target)).floatValue();
+                            } catch (Exception ex) {
+                                // give up, leave at 0,0
+                            }
+                        }
+                    } else {
+                        // try sprite methods directly
+                        try {
+                            targetX = ((Number) target.getClass()
+                                    .getMethod("getXInUserInterfaceDimensionUnit").invoke(target)).floatValue();
+                            targetY = ((Number) target.getClass()
+                                    .getMethod("getYInUserInterfaceDimensionUnit").invoke(target)).floatValue();
+                        } catch (Exception ex) {
+                            // ignore
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore and continue
+                }
+
+                Vector2 targetPos = new Vector2(targetX, targetY);
+
+                if (camera.followMode == FollowMode.NONE) {
+                    // do nothing
+                } else if (camera.followMode == FollowMode.LOCK_ON) {
+                    camera.position.set(targetPos);
+                } else if (camera.followMode == FollowMode.SMOOTH_FOLLOW) {
+                    // LERP towards the target using speed as factor (0..1)
+                    camera.position.lerp(targetPos, clamp01(camera.speed));
+                }
+
+                if (camera.clampToScene) {
+                    // Clamp to scene bounds (simple approach using project virtual screen)
+                    try {
+                        float sceneWidth = ProjectManager.getInstance().getCurrentProject().getXmlHeader().virtualScreenWidth;
+                        float sceneHeight = ProjectManager.getInstance().getCurrentProject().getXmlHeader().virtualScreenHeight;
+
+                        float x = Math.max(0f, Math.min(camera.position.x, sceneWidth));
+                        float y = Math.max(0f, Math.min(camera.position.y, sceneHeight));
+                        camera.position.set(x, y);
+                    } catch (Exception e) {
+                        // ignore if cannot clamp
+                    }
+                }
+
+            } catch (Exception e) {
+                // keep camera as-is on errors
+            }
+        }
+    }
+
+    private float clamp01(float v) {
+        if (Float.isNaN(v) || v <= 0f) {
+            return 0f;
+        }
+        if (v >= 1f) {
+            return 1f;
+        }
+        return v;
     }
 
     public Map<String, Camera> getCameras() {
