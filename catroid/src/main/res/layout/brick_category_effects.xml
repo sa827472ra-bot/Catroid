@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Catroid: An on-device visual programming system for Android devices
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/BrickCategory.Effects"
+    android:orientation="horizontal">
+
+    <include layout="@layout/icon_brick_category_effects" />
+
+    <TextView
+        style="@style/BrickCategoryText"
+        android:text="@string/category_effects" />
+
+</LinearLayout>
