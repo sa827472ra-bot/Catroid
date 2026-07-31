@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Catroid: An on-device visual programming system for Android devices
+  ~ Copyright (C) 2010-2026 The Catrobat Team
+  ~ (<http://developer.catrobat.org/credits>)
+  -->
+
+<resources>
+    <string name="category_effects">Effects</string>
+    <string name="brick_particle_effect">Particle effect</string>
+    <string name="particle_profile_editor_title">Particle profiles</string>
+    <string name="particle_profile_new">New profile</string>
+    <string name="particle_profile_edit">Edit profile</string>
+    <string name="particle_profile_delete">Delete profile</string>
+    <string name="particle_profile_name_hint">Profile name</string>
+    <string name="particle_profile_select_textures">Select textures</string>
+    <string name="particle_profile_count">Particle count</string>
+    <string name="particle_profile_duration">Duration (s)</string>
+    <string name="particle_profile_size_scale">Size scale</string>
+</resources>
