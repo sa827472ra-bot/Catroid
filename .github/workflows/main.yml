@@ -23,7 +23,8 @@ on:
 
 env:
   # Java version for the JDK setup
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
+  
 
 jobs:
 
