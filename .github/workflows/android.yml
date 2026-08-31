@@ -1,4 +1,4 @@
-name: Android CI
+name: Andro3id CI
 
 on:
   push:
