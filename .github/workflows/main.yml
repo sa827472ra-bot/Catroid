@@ -28,7 +28,7 @@ env:
 jobs:
 
   repo-check:
-  # set --env GITHUB_REPOSITORY=Catrobat/Catroid for local runs in act since env.ACT is not accessible here
+    # set --env GITHUB_REPOSITORY=Catrobat/Catroid for local runs in act since env.ACT is not accessible here
     name: Repo Check
     runs-on: ubuntu-latest
     steps:
@@ -61,6 +61,7 @@ jobs:
 
       - name: Build APK
         run: ./gradlew ${{ env.WEB_TEST_URL }} -Pindependent='#${{ github.run_number }} ${{ github.ref_name }}' assembleCatroidDebug ${{ env.ALL_FLAVOURS_PARAMETERS }}
+
 
   unit-tests:
     needs: repo-check
@@ -111,6 +112,10 @@ jobs:
     needs: repo-check
     name: Code Analysis
     runs-on: ubuntu-latest
+    # 👇 PERMISSÕES DE SEGURANÇA ADICIONADAS AQUI 👇
+    permissions:
+      security-events: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -142,7 +147,8 @@ jobs:
           esac
 
       - name: Upload ${{ matrix.tool.name }} SARIF Report
-        uses: github/codeql-action/upload-sarif@v3
+        # 👇 ATUALIZADO PARA v4 PARA REMOVER O AVISO 👇
+        uses: github/codeql-action/upload-sarif@v4
         if: ${{ matrix.tool.sarif && (success() || failure()) }}
         with:
           sarif_file: catroid/build/reports/${{ matrix.tool.name }}.sarif
@@ -157,14 +163,14 @@ jobs:
             catroid/build/reports/html/${{ matrix.tool.name }}.html
 
   instrumented-unit-tests:
-    needs: repo-check
-    name: Instrumented Unit Tests
-    uses: ./.github/workflows/emulated_tests.yml
     permissions:
       checks: write
       contents: write
       pull-requests: write
       repository-projects: write
+    needs: repo-check
+    name: Instrumented Unit Tests
+    uses: ./.github/workflows/emulated_tests.yml
     with:
       gradle-test-config: org.catrobat.catroid.testsuites.LocalHeadlessTestSuite
       calling-job: instrumented-unit-tests
