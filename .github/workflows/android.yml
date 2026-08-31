@@ -24,11 +24,5 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleApktemplateDebug -x externalNativeBuildCleanApktemplateDebug -x :vncclient:externalNativeBuildCleanDebug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: catroid-apktemplate-debug
-        # Caminho padrão onde o Gradle salva os APKs do módulo "catroid"
-        path: catroid/build/outputs/apk/apktemplate/debug/**/*.apk 
+      # Caso dê erro de conflito de tarefas de novo, lembre-se de especificar o flavor (ex: assembleCatroidDebug)
+      run: ./gradlew assembleDebug
