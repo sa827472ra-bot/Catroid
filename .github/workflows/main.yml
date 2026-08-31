@@ -63,7 +63,6 @@ jobs:
       - name: Build APK
         run: ./gradlew ${{ env.WEB_TEST_URL }} -Pindependent='#${{ github.run_number }} ${{ github.ref_name }}' assembleCatroidDebug ${{ env.ALL_FLAVOURS_PARAMETERS }}
 
-
   unit-tests:
     needs: repo-check
     name: Unit Tests
@@ -159,23 +158,27 @@ jobs:
             catroid/build/reports/html/${{ matrix.tool.name }}.html
 
   instrumented-unit-tests:
+    needs: repo-check
+    name: Instrumented Unit Tests
+    uses: ./.github/workflows/emulated_tests.yml
     permissions:
       checks: write
       contents: write
       pull-requests: write
       repository-projects: write
-    needs: repo-check
-    name: Instrumented Unit Tests
-    uses: ./.github/workflows/emulated_tests.yml
     with:
-      gradle-test-config: org.catrobat.catroid.testsuites.LocalHea...
+      gradle-test-config: org.catrobat.catroid.testsuites.LocalHeadlessTestSuite
       calling-job: instrumented-unit-tests
-
 
   testrunner-tests:
     needs: repo-check
     name: Testrunner Tests
     uses: ./.github/workflows/emulated_tests.yml
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+      repository-projects: write
     with:
       gradle-test-config: org.catrobat.catroid.catrobattestrunner.CatrobatTestRunner
       calling-job: testrunner-tests
@@ -184,6 +187,11 @@ jobs:
     needs: repo-check
     name: Quarantined Tests
     uses: ./.github/workflows/emulated_tests.yml
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+      repository-projects: write
     with:
       gradle-test-config: org.catrobat.catroid.testsuites.UiEspressoQuarantineTestSuite
       calling-job: quarantined-tests
@@ -192,6 +200,11 @@ jobs:
     needs: repo-check
     name: RTL Tests
     uses: ./.github/workflows/emulated_tests.yml
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+      repository-projects: write
     with:
       gradle-test-config: org.catrobat.catroid.testsuites.UiEspressoRtlTestSuite
       calling-job: rtl-tests
