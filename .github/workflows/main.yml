@@ -159,12 +159,18 @@ jobs:
             catroid/build/reports/html/${{ matrix.tool.name }}.html
 
   instrumented-unit-tests:
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+      repository-projects: write
     needs: repo-check
     name: Instrumented Unit Tests
     uses: ./.github/workflows/emulated_tests.yml
     with:
-      gradle-test-config: org.catrobat.catroid.testsuites.LocalHeadlessTestSuite
+      gradle-test-config: org.catrobat.catroid.testsuites.LocalHea...
       calling-job: instrumented-unit-tests
+
 
   testrunner-tests:
     needs: repo-check
